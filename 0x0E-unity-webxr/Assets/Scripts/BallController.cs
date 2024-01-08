@@ -9,6 +9,7 @@ public class BallController : MonoBehaviour
     private bool onTrack = false;
     private bool isReset = false;
     private Vector3 startingPoint;
+    private List<GameObject> obstacles = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
