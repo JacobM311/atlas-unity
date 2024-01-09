@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class ObstacleController : MonoBehaviour
 {
-    public Collider BallThrown;
-
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +18,8 @@ public class ObstacleController : MonoBehaviour
 
     public void Activate()
     {
-        
+        Vector3 currentPosition = transform.position;
+        currentPosition.x = Random.Range(-.5f, .5f);
+        transform.position = currentPosition;
     }
 }

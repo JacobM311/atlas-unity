@@ -5,11 +5,12 @@ using UnityEngine;
 public class BallController : MonoBehaviour
 {
     public float force = .5f;
+    private float boostForce = 10.0f;
     private Rigidbody rb;
     private bool onTrack = false;
-    private bool isReset = false;
     private Vector3 startingPoint;
-    private List<GameObject> obstacles = new List<GameObject>();
+    public Animator animator;
+
 
     // Start is called before the first frame update
     void Start()
@@ -51,7 +52,44 @@ public class BallController : MonoBehaviour
     {
         if (other.gameObject.tag == "BallThrown")
         {
+            animator.enabled = true;
+            animator.SetTrigger("OnTrack");
             onTrack = true;
         }
+
+        if (other.gameObject.tag == "Boost")
+        {
+            rb.AddForce(Vector3.forward * boostForce);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.tag == "BallThrown")
+        {
+            StartCoroutine(Reset(3.5f));
+        }
+    }
+
+    private IEnumerator Reset(float delay)
+    {
+        if (onTrack)
+        {
+            onTrack = false;
+            yield return new WaitForSeconds(delay);
+            ResetBall();
+        }
+    }
+
+    private void ResetBall()
+    {
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        transform.position = startingPoint;
+    }
+
+    public void DisableAnimator()
+    {
+        animator.enabled = false;
     }
 }
