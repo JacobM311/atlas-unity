@@ -5,6 +5,21 @@ using UnityEngine;
 public class AlleyController : MonoBehaviour
 {
     public GameObject[] obstacles;
+    private List<GameObject> knockedOverPins = new List<GameObject>();
+    private bool coroutineRunning = false;
+    private int BallResets = 0;
+
+    private void Update()
+    {
+        if (BallResets == 2)
+        {
+            BallResets = 0;
+            if (knockedOverPins != null)
+            {
+                ResetAllPins();
+            }
+        }
+    }
 
 
     private void OnTriggerEnter(Collider other)
@@ -15,14 +30,11 @@ public class AlleyController : MonoBehaviour
         }
     }
 
-    private void OnTriggerExit(Collider other)
+    public void ResetObstacles()
     {
-        if (other.CompareTag("Interactable"))
+        foreach (var obstacle in obstacles)
         {
-            foreach (var obstacle in obstacles)
-            {
-                obstacle.SetActive(false);
-            }
+            obstacle.SetActive(false);
         }
     }
 
@@ -44,4 +56,51 @@ public class AlleyController : MonoBehaviour
             }
         }
     }
+
+    public void RemovePin(GameObject pin)
+    {
+        if (!knockedOverPins.Contains(pin))
+        {
+            knockedOverPins.Add(pin);
+        }
+
+        if (!coroutineRunning)
+        {
+            StartCoroutine(DisablePinsAfterDelay(4f));
+        }
+    }
+
+    private IEnumerator DisablePinsAfterDelay(float delay)
+    {
+        coroutineRunning = true;
+        yield return new WaitForSeconds(delay);
+
+        foreach (GameObject pin in knockedOverPins)
+        {
+            pin.SetActive(false);
+        }
+        coroutineRunning = false;
+    }
+
+    private void ResetAllPins()
+    {
+        foreach(GameObject pin in knockedOverPins)
+        {
+            PinScript pinScript = pin.GetComponentInParent<PinScript>();
+
+            if (pinScript != null)
+            {
+                pinScript.ResetPins();
+            }
+        }
+        knockedOverPins.Clear();
+    }
+
+    public void ResetsIterator()
+    {
+        BallResets++;
+        Debug.Log(BallResets);
+    }
+
+
 }

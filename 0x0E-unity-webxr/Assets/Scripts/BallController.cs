@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class BallController : MonoBehaviour
 {
@@ -10,6 +11,8 @@ public class BallController : MonoBehaviour
     private bool onTrack = false;
     private Vector3 startingPoint;
     public Animator animator;
+    public AlleyController alleyController;
+    public Collider resetArea;
 
 
     // Start is called before the first frame update
@@ -35,16 +38,22 @@ public class BallController : MonoBehaviour
                 rb.AddForce(Vector3.right * force);
             }
         }
+
     }
 
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.gameObject.tag == "Reset")
         {
+            alleyController.ResetsIterator();
+            resetArea.enabled = false;
             rb.velocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
             transform.position = startingPoint;
             onTrack = false;
+            alleyController.ResetObstacles();
+            resetArea.enabled = true;
+            Debug.Log("reset area reset");
         }
     }
 
@@ -67,11 +76,13 @@ public class BallController : MonoBehaviour
     {
         if (other.gameObject.tag == "BallThrown")
         {
-            StartCoroutine(Reset(3.5f));
+            resetArea.enabled = false;
+            Debug.Log("trigger exit reset");
+            StartCoroutine(InitialReset(3.5f));
         }
     }
 
-    private IEnumerator Reset(float delay)
+    private IEnumerator InitialReset(float delay)
     {
         if (onTrack)
         {
@@ -83,9 +94,12 @@ public class BallController : MonoBehaviour
 
     private void ResetBall()
     {
+        resetArea.enabled = true;
         rb.velocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         transform.position = startingPoint;
+        alleyController.ResetsIterator();
+        alleyController.ResetObstacles();
     }
 
     public void DisableAnimator()
